@@ -4,6 +4,8 @@
 This is a simple RESTful API for scheduling HTTP requests. It is built using Rust 
 language and Actix framework.
 
+***The service is under heavy development, below features may not be available until it is done***
+
 ## Usage
 ### Create a schedule
 To create a schedule, send a POST request to `/schedule` with the following body:
