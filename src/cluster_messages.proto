@@ -1,0 +1,22 @@
+syntax = "proto3";
+package schedule_rs;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message Schedule {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string cron = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  google.protobuf.Duration duration = 7;
+  string timezone = 8;
+  string location = 9;
+  string status = 10;
+  string created_by = 11;
+  google.protobuf.Timestamp created_at = 12;
+  string updated_by = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
