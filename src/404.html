@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Lost in Space!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #000;
+            color: #fff;
+            text-align: center;
+            padding-top: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(
+                    to bottom,
+                    #000,
+                    #000 50%,
+                    #222 50%,
+                    #222
+            );
+            background-size: 100% 4px;
+        }
+
+        h1 {
+            font-size: 14em;
+            margin: 0;
+            text-shadow: 3px 2px 2px rgba(251, 12, 12, 1), 0px -1px 3px rgba(12, 79, 251, .5), -3px 0px 2px rgba(52, 251, 12, 1);
+            animation: chromaticMove 4500ms ease infinite, pulse ease 200ms infinite, gradientMove 200ms ease infinite;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin: 0.5em 0;
+            font-weight: 400;
+        }
+
+        .emoji {
+            font-size: 5em;
+            margin-bottom: 0.5em;
+            /* make text surround emoji */
+            line-height: 1em;
+            display: inline;
+            vertical-align: top;
+            float: left;
+
+        }
+
+        .message {
+            /*make text align to emoj */
+            position: relative;
+            /*margin-left: 7em;*/
+
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            margin-top: 20px;
+            border: 2px solid #ff6b6b;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-weight: 700;
+        }
+
+        a:hover {
+            background-color: #ff6b6b;
+            color: #ffffff;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-size: 100% 4px
+            }
+            50% {
+                background-size: 100% 2px
+            }
+            100% {
+                background-size: 100% 4px
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: .9;
+                transform: skewX(.5deg);
+            }
+            25% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .9;
+            }
+            75% {
+                opacity: 1;
+                transform: skewX(.5deg);
+            }
+            100% {
+                opacity: .9;
+            }
+        }
+
+        @keyframes chromaticMove {
+            0% {
+                text-shadow: 3px 2px 2px rgba(251, 12, 12, 1), 0px -1px 3px rgba(12, 79, 251, .5), 0px 0px -2px rgba(52, 251, 12, 1);
+            }
+            50% {
+                text-shadow: 3px 2px 2px rgba(251, 12, 12, 1), 0px -1px 3px rgba(12, 79, 251, .5), -3px 2px 3px rgba(52, 251, 12, 1);
+            }
+            100% {
+                text-shadow: 3px 2px 2px rgba(251, 12, 12, 1), 0px -1px 3px rgba(12, 79, 251, .5), 2px -1px 2px rgba(52, 251, 12, 1);
+            }
+        }
+    </style>
+
+
+    <style>
+        .clear {
+            clear: both;
+        }
+
+        .clear::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2em; /* Padding around the content */
+            max-width: 90%; /* Ensures content doesn't touch the viewport edges */
+            margin: 0 auto; /* Centers the content horizontally */
+        }
+
+        .error-code {
+            flex: 1; /* Takes up half the space */
+            text-align: right; /* Aligns the 404 to the right of its container */
+            padding-right: 1em; /* Adds some spacing between the 404 and the message */
+        }
+
+        .error-message {
+            flex: 2; /* Takes up the other half of the space */
+            text-align: left; /* Aligns the message to the left of its container */
+            padding-left: 1em; /* Adds some spacing between the message and the 404 */
+            justify-content: left;
+        }
+        .action {
+            /* ... (your existing styles) ... */
+            position: relative;
+            overflow: hidden; /* To contain the supernova effect within the button */
+            transform: scale(1);
+            transition: transform 0.3s;
+        }
+
+        .action::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.8); /* Supernova color */
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: width 0.3s, height 0.3s, transform 0.3s;
+            z-index: -1;
+        }
+
+        .action:active {
+            transform: scale(1.05); /* Slight growth to simulate explosion */
+        }
+
+        .action:active::before {
+            width: 300%; /* Explosion size */
+            height: 300%;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+<div class="content-wrapper">
+    <div class="error-code">
+        <h1>404</h1>
+    </div>
+    <div class="error-message">
+        <div class="emoji">👾</div>
+        <p class="message">Hey there, galaxy hitchhiker! Remember, even the smoothest cosmic paths have their asteroids;
+            it's the unexpected wormholes that truly test our journey.</p>
+        <div class="clear"></div>
+
+    </div>
+</div>
+<div class="content-wrapper">
+    <a class="action" href="/">Beam me back!</a>
+</div>
+</body>
+</html>

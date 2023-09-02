@@ -1,8 +1,14 @@
 # schedule-rs
 
 ## Description
-This is a simple RESTful API for scheduling HTTP requests. It is built using Rust 
-language and Actix framework.
+This is a RESTful API for scheduling HTTP requests. It is built using Rust 
+language and Actix framework, backed up with Sled KV store. It is designed to be
+highly available and scalable. It can be deployed as a single node or a cluster.
+Cluster is driven by async-raft library. It uses Raft consensus algorithm to
+replicate the database to all nodes in the cluster. It is also designed to be
+fault-tolerant. If a node is down, the cluster will still be available and available nodes
+will take over the down node's responsibilities (to execute schedules). The cluster will be unavailable
+only if the majority of nodes are down.
 
 ***The service is under heavy development, below features may not be available until it is done***
 
@@ -207,10 +213,9 @@ You can configure the service by setting the following environment variables:
 - `SCHEDULERS_RETENTION_POLICY`: Retention policy in days. Default: `30`
 - `SCHEDULERS_PORT`: Port to listen to. Default: `8080`
 - `SCHEDULERS_HOST`: Host to listen to. Default: machine's hostname
-- `SCHEDULERS_API_KEY`: API key to authenticate API calls. Default: `""` this will change
-  in the future to support cloud deployment.
-- `SCHEDULERS_CALLBACK_TIMEOUT`: Timeout for callback request in seconds. Default: `10`
-- `SCHEDULERS_CALLBACK_RETRY_INTERVAL`: Interval between callback retries in seconds. Default: `1, 5, 30`. 
+- `SCHEDULERS_API_KEY`: API key to authenticate API calls. Default: `None`
+- `SCHEDULERS_CALLBACK_TIMEOUT`: Default timeout for callback request in seconds. Default: `10`
+- `SCHEDULERS_CALLBACK_RETRY_INTERVAL`: Default interval between callback retries in seconds. Default: `1, 5, 30`. 
    This also sets number of retries. The above example will retry 3 times with interval of 1, then 5 and 
    finally 30 seconds. Repeating schedule will be executed again after the last retry regardless of previous 
    schedule execution status.

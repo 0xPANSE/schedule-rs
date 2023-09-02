@@ -1,4 +1,4 @@
-use super::msg::{ScheduleEvent, ScheduleEventResponse};
+use super::msg::{ScheduleData, ScheduleEventResponse};
 use crate::cluster::snapshot::ClusterSnapshot;
 use anyhow::{Context, Result};
 use async_raft::raft::{Entry, EntryPayload, MembershipConfig};
@@ -51,7 +51,7 @@ impl SchedulerRaftStorage {
 pub struct ShutdownError(TransactionError<anyhow::Error>);
 
 #[async_trait]
-impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage {
+impl RaftStorage<ScheduleData, ScheduleEventResponse> for SchedulerRaftStorage {
     type Snapshot = ClusterSnapshot;
     type ShutdownError = ShutdownError;
 
@@ -59,7 +59,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
     async fn get_membership_config(&self) -> Result<MembershipConfig> {
         let mut current_key = u64::MAX.to_be_bytes().to_vec();
         while let Some((key_vec, value_vec)) = self.db.get_lt(current_key.clone())? {
-            let value = serde_json::from_slice::<Entry<ScheduleEvent>>(value_vec.as_ref())?;
+            let value = serde_json::from_slice::<Entry<ScheduleData>>(value_vec.as_ref())?;
             let cfg_opt = match value.payload {
                 EntryPayload::ConfigChange(cfg) => Some(cfg.membership.clone()),
                 EntryPayload::SnapshotPointer(snap) => Some(snap.membership.clone()),
@@ -84,7 +84,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
                 let (last_log_index, last_log_term) = match log_entry {
                     Some((_, value_vec)) => {
                         let value =
-                            serde_json::from_slice::<Entry<ScheduleEvent>>(value_vec.as_ref())?;
+                            serde_json::from_slice::<Entry<ScheduleData>>(value_vec.as_ref())?;
                         (value.index, value.term)
                     }
                     None => (0, 0),
@@ -113,7 +113,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
     }
 
     #[tracing::instrument(level = "trace", skip(self))]
-    async fn get_log_entries(&self, start: u64, stop: u64) -> Result<Vec<Entry<ScheduleEvent>>> {
+    async fn get_log_entries(&self, start: u64, stop: u64) -> Result<Vec<Entry<ScheduleData>>> {
         // Invalid request, return empty vec.
         if start > stop {
             tracing::error!("invalid request, start > stop");
@@ -123,7 +123,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
         let stop = stop.to_be_bytes().to_vec();
         let mut entries = vec![];
         for value_vec in self.db.range(start..stop).values() {
-            let value = serde_json::from_slice::<Entry<ScheduleEvent>>(value_vec?.as_ref())?;
+            let value = serde_json::from_slice::<Entry<ScheduleData>>(value_vec?.as_ref())?;
             entries.push(value);
         }
 
@@ -166,7 +166,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
     }
 
     #[tracing::instrument(level = "trace", skip(self, entry))]
-    async fn append_entry_to_log(&self, entry: &Entry<ScheduleEvent>) -> Result<()> {
+    async fn append_entry_to_log(&self, entry: &Entry<ScheduleData>) -> Result<()> {
         let key = entry.index.to_be_bytes().to_vec();
         let value = serde_json::to_vec(entry)?;
         self.db
@@ -180,12 +180,12 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
                 db.flush();
                 Ok(())
             })
-            .map_err(|e: TransactionError<anyhow::Error>| ShutdownError(e))
+            .map_err(ShutdownError)
             .context("Raft append_entry_to_log error")
     }
 
     #[tracing::instrument(level = "trace", skip(self, entries))]
-    async fn replicate_to_log(&self, entries: &[Entry<ScheduleEvent>]) -> Result<()> {
+    async fn replicate_to_log(&self, entries: &[Entry<ScheduleData>]) -> Result<()> {
         // serialize entries
         let mut batch: Batch = Batch::default();
         for entry in entries {
@@ -208,7 +208,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
     async fn apply_entry_to_state_machine(
         &self,
         index: &u64,
-        data: &ScheduleEvent,
+        data: &ScheduleData,
     ) -> Result<ScheduleEventResponse> {
         let mut sm = self.state.write().await;
         sm.last_applied_log = *index;
@@ -216,7 +216,7 @@ impl RaftStorage<ScheduleEvent, ScheduleEventResponse> for SchedulerRaftStorage 
     }
 
     #[tracing::instrument(level = "trace", skip(self, entries))]
-    async fn replicate_to_state_machine(&self, entries: &[(&u64, &ScheduleEvent)]) -> Result<()> {
+    async fn replicate_to_state_machine(&self, entries: &[(&u64, &ScheduleData)]) -> Result<()> {
         todo!()
     }
 
