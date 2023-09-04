@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-pub type RequestHeaders = Vec<(String, String)>;
-pub type ScheduleTags = Vec<String>;
+pub type RequestHeaders = HashMap<String, String>;
+pub type Tags = Vec<String>;
 pub type ScheduleId = String;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -31,7 +32,7 @@ pub struct ScheduleDocument {
     /// Unique identifier for schedule
     pub id: String,
     /// Optional tags to group schedules
-    pub tags: Option<ScheduleTags>,
+    pub tags: Option<Tags>,
     /// Request to be executed on given schedule
     pub request: RequestDocument,
     /// Schedule in cron format
@@ -45,6 +46,8 @@ pub struct ScheduleDocument {
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// Updated at
     pub updated_at: chrono::DateTime<chrono::Utc>,
+    /// last successful run
+    pub last_run: Option<chrono::DateTime<chrono::Utc>>,
     /// status
     #[serde(default = "ScheduleStatus::default")]
     pub status: ScheduleStatus,

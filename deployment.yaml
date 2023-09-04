@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: schedule-rs
+  labels:
+    app: schedule-rs
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+  clusterIP: None
+  selector:
+    app: schedule-rs
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: schedule-rs
+  labels:
+    app: schedule-rs
+spec:
+  selector:
+    matchLabels:
+      app: schedule-rs
+  serviceName: schedule-rs
+  replicas: 3
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: schedule-rs
+    spec:
+      containers:
+        - name: schedule-rs
+          image: schedule-rs
+          imagePullPolicy: IfNotPresent
+          ports:
+              - containerPort: 8080
+                name: api-port
+          volumeMounts:
+            - name: schedule-rs-data
+              mountPath: "/var/lib/schedule-rs/data"
+          env:
+            - name: RUST_LOG
+              value: "debug"
+            - name: SCHEDULERS_DB_PATH
+              value: "/var/lib/schedule-rs/data"
+            - name: SCHEDULERS_RETENTION_POLICY
+              value: "10m"
+            - name: SCHEDULERS_PORT
+              value: "8080"
+            - name: SCHEDULERS_API_KEY
+              value: "secret"
+            - name: SCHEDULERS_CALLBACK_TIMEOUT
+              value: "10s"
+            - name: SCHEDULERS_CALLBACK_RETRY_INTERVAL
+              value: "1s,5s,30s"
+
+  volumeClaimTemplates:
+    - metadata:
+        name: schedule-rs-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast
+provisioner: k8s.io/minikube-hostpath
+parameters:
+  type: pd-ssd

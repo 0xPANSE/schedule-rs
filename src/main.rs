@@ -15,6 +15,7 @@ pub(crate) mod app_context;
 pub(crate) mod config;
 mod db;
 mod metrics;
+mod scheduler;
 
 const HTML_404: &str = include_str!("404.html");
 async fn not_found() -> impl Responder {

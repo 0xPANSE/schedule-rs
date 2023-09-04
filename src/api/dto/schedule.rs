@@ -1,4 +1,7 @@
-use crate::db::schema::{CallbackDocument, RequestHeaders, ScheduleStatus, ScheduleTags};
+use crate::db::schema::{
+    CallbackDocument, RequestHeaders, ScheduleDocument, ScheduleStatus, Tags,
+};
+use actix::Message;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -21,7 +24,8 @@ pub struct RequestDto {
     pub url: String,
     pub method: String,
     pub headers: Option<RequestHeaders>,
-    pub body: Option<Vec<u8>>,
+    pub body: Option<String>,
+    pub retry: Option<Vec<u32>>,
 }
 
 impl From<crate::db::schema::RequestDocument> for RequestDto {
@@ -30,7 +34,8 @@ impl From<crate::db::schema::RequestDocument> for RequestDto {
             url: document.url,
             method: document.method,
             headers: document.headers,
-            body: document.body.map(|body| body.into_bytes()),
+            body: document.body,
+            retry: document.retry,
         }
     }
 }
@@ -40,7 +45,7 @@ pub struct ScheduleDto {
     /// Unique identifier for schedule
     pub id: String,
     /// Optional tags to group schedules
-    pub tags: Option<ScheduleTags>,
+    pub tags: Option<Tags>,
     /// Request to be executed on given schedule
     pub request: RequestDto,
     /// Schedule in cron format
@@ -62,8 +67,8 @@ pub struct ScheduleDto {
     pub status: ScheduleStatus,
 }
 
-impl From<crate::db::schema::ScheduleDocument> for ScheduleDto {
-    fn from(document: crate::db::schema::ScheduleDocument) -> Self {
+impl From<ScheduleDocument> for ScheduleDto {
+    fn from(document: ScheduleDocument) -> Self {
         Self {
             id: document.id,
             tags: document.tags,
@@ -78,12 +83,13 @@ impl From<crate::db::schema::ScheduleDocument> for ScheduleDto {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Message)]
+#[rtype(result = "Result<ScheduleDto, std::io::Error>")]
 pub struct CreateScheduleDto {
     /// Unique identifier for schedule
     pub id: String,
     /// Optional tags to group schedules
-    pub tags: Option<ScheduleTags>,
+    pub tags: Option<Tags>,
     /// Request to be executed on given schedule
     pub request: RequestDto,
     /// Schedule in cron format
@@ -94,7 +100,8 @@ pub struct CreateScheduleDto {
     pub callback: Option<CallbackDto>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Message)]
+#[rtype(result = "Result<ScheduleDto, std::io::Error>")]
 pub struct UpdateScheduleDto {
     /// Unique identifier for schedule
     pub id: String,
